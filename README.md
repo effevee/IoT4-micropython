@@ -1,2 +1,2 @@
 # IoT4-MicroPython
-MicroPython code van cursus IoT4
+MicroPython code from course IoT4 - HetCVO 
