@@ -6,7 +6,7 @@ res = rak1.start()
 print(res)
 
 if res == "OK":
-    res = rak1.getVersion()
-    print(res)
+    print(rak1.getVersion())
+    print(rak1.getStatus())
 
 rak1.stop()

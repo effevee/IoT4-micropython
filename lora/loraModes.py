@@ -21,7 +21,7 @@ class rak811P2P(rak811):
                 # set P2P mode
                 utime.sleep_ms(20)
                 self.serdev.write(str.encode("at+set_config=lora:work_mode:1\r\n"))
-                res = self.isOK(10,True)
+                res = self.isOK(10, "OK")
                 if res == "NOK":
                     if self.debug:
                         print("change mode to P2P not OK")
@@ -34,22 +34,23 @@ class rak811P2P(rak811):
                 if self.spread < 6 or self.spread > 12:
                     self.spread = 6
                 # control codingrate
-                if self.coderate < 1 or self.coderate>4:
+                if self.coderate < 1 or self.coderate > 4:
                     self.coderate = 1
                 # control preamble
-                if self.preamble < 5 or self.preamble>65535:
+                if self.preamble < 5 or self.preamble > 65535:
                     self.preamble = 5
                 # control power
-                if self.power < 5 or self.power>20:
+                if self.power < 5 or self.power > 20:
                     self.power = 5
                 
                 # set communication parameters
                 sendSettingStr = "lorap2p:" + str(self.freq) + ":" + str(self.spread) + ":" + str(self.bandwidth) + ":" + str(self.coderate) + ":" +s tr(self.preamble) + ":" + str(self.power)
                 self.serdev.write(str.encode("at+set_config=" + sendSettingStr + "\r\n"))
-                res = self.isOK(10,True)
+                res = self.isOK(10, "OK")
                 if res == "NOK" and self.debug:
                     print("problem with P2P config params")
-                return ("NOK")
+                    return "NOK"
+                return "OK"
             else:
                 if self.debug:
                     print("problem with start RAK811")
@@ -63,11 +64,11 @@ class rak811P2P(rak811):
     
     def send(self,msg):
         try:
-            Hex=binascii.hexlify(msg.encode("utf-8"))
+            Hex = binascii.hexlify(msg.encode("utf-8"))
             if self.debug:
                 print(Hex)
             self.serdev.write(str.encode("at+send=lorap2p:" + str(Hex.decode()) + "\r\n"))
-            res = self.isOK(5,True)
+            res = self.isOK(5, "OK")
             return res
         
         except Exception as E:
