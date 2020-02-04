@@ -44,7 +44,7 @@ class rak811P2P(rak811):
                     self.power = 5
                 
                 # set communication parameters
-                sendSettingStr = "lorap2p:" + str(self.freq) + ":" + str(self.spread) + ":" + str(self.bandwidth) + ":" + str(self.coderate) + ":" +s tr(self.preamble) + ":" + str(self.power)
+                sendSettingStr = "lorap2p:" + str(self.freq) + ":" + str(self.spread) + ":" + str(self.bandwidth) + ":" + str(self.coderate) + ":" + str(self.preamble) + ":" + str(self.power)
                 self.serdev.write(str.encode("at+set_config=" + sendSettingStr + "\r\n"))
                 res = self.isOK(10, "OK")
                 if res == "NOK" and self.debug:
@@ -58,7 +58,7 @@ class rak811P2P(rak811):
         
         except Exception as E:
             if self.debug:
-                print(E)
+                print("Error on start P2P: ",E)
             return "NOK"
 
     
@@ -73,10 +73,33 @@ class rak811P2P(rak811):
         
         except Exception as E:
             if self.debug:
-                print(E)
+                print("Error on send P2P: ", E)
             return "NOK"
 
     
+    def recv(self):
+        try:
+            res = self.serdev.readline()
+            if res == None:
+                return "NOK"
+            else:
+                res = res.decode('utf-8')
+                if self.debug:
+                    print(res)
+                if "at+recv" in res:
+                    msg = res.split(":")
+                    msg = msg[-1].replace("\r\n", "")
+                    msg = bytes.fromhex(msg).decode('utf-8')
+                    return msg
+                else:
+                    return "NOK"
+                            
+        except Exception as E:
+            if self.debug:
+                print("Error on receive P2P: ", E)
+            return "NOK"
+        
+        
     def getConfigParams(self):
         config = {"freq":self.freq, "bandwidth":self.bandwidth, "spreading":self.spread, "coderating":self.coderate, "preamble":self.preamble, "power":self.power}
         return config
