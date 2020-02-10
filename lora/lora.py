@@ -53,15 +53,8 @@ class rak811:
     
     
     def getStatus(self):
-        try:
-            self.serdev.write(str.encode("at+get_config=lora:status\r\n"))
-            return self.isOK(30, "List End")
-        
-        except Exception as E:
-            if self.debug:
-                print('Error on getStatus: ',E)
-            return "NOK"
-        
+        pass
+    
     
     def isOK(self, lines, stop):
         try:

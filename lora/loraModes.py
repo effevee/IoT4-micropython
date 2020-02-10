@@ -1,5 +1,5 @@
 from lora import rak811
-import binascii
+import ubinascii
 import utime
 
 class rak811P2P(rak811):
@@ -29,7 +29,7 @@ class rak811P2P(rak811):
                 
                 # translate bandwidth 125, 250, 500 kHz to 0, 1, 2
                 posBandWidths = {125:0, 250:1, 500:2}
-                self.bandwidth=posBandWidths.get(self.bandwidth,0)
+                self.bandwidth=posBandWidths.get(self.bandwidth, 0)
                 # control spreading
                 if self.spread < 6 or self.spread > 12:
                     self.spread = 6
@@ -40,7 +40,7 @@ class rak811P2P(rak811):
                 if self.preamble < 5 or self.preamble > 65535:
                     self.preamble = 5
                 # control power
-                if self.power < 5 or self.power > 20:
+                if self.power < 5 or self.power > 14:
                     self.power = 5
                 
                 # set communication parameters
@@ -64,7 +64,7 @@ class rak811P2P(rak811):
     
     def send(self,msg):
         try:
-            Hex = binascii.hexlify(msg.encode("utf-8"))
+            Hex = ubinascii.hexlify(msg.encode("utf-8"))
             if self.debug:
                 print(Hex)
             self.serdev.write(str.encode("at+send=lorap2p:" + str(Hex.decode()) + "\r\n"))
@@ -81,17 +81,27 @@ class rak811P2P(rak811):
         try:
             res = self.serdev.readline()
             if res == None:
+                if self.debug:
+                    print('No response')
                 return "NOK"
             else:
                 res = res.decode('utf-8')
                 if self.debug:
                     print(res)
                 if "at+recv" in res:
+                    # at+recv=a,b,c:XYZ\r\n
+                    # with a,b,c receive status info and XYZ the payload message
                     msg = res.split(":")
-                    msg = msg[-1].replace("\r\n", "")
-                    msg = bytes.fromhex(msg).decode('utf-8')
-                    return msg
+                    if len(msg) < 2:
+                        if self.debug:
+                            print('No valid message payload')
+                        return "NOK"
+                    # remove \r\n from the end of the payload
+                    msg = msg[1][:-2]  
+                    msg = ubinascii.unhexlify(msg).decode('utf-8')
+                    return 'msg=' + msg
                 else:
+                    print('No at+recv response')
                     return "NOK"
                             
         except Exception as E:
@@ -103,3 +113,14 @@ class rak811P2P(rak811):
     def getConfigParams(self):
         config = {"freq":self.freq, "bandwidth":self.bandwidth, "spreading":self.spread, "coderating":self.coderate, "preamble":self.preamble, "power":self.power}
         return config
+
+
+    def getStatus(self):
+        try:
+            self.serdev.write(str.encode("at+get_config=lora:status\r\n"))
+            return self.isOK(30, "List End")
+        
+        except Exception as E:
+            if self.debug:
+                print('Error on getStatus: ',E)
+            return "NOK"
