@@ -1,7 +1,7 @@
 from loraModes import rak811P2P
 import utime
 
-rakr = rak811P2P(1, 115200, freq=868300000, debug=True)
+rakr = rak811P2P(1, 115200, freq=868300000, debug=False)
 res = rakr.start()
 if res == "OK":
     print(rakr.getStatus())
