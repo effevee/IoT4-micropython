@@ -31,8 +31,8 @@ class rak811P2P(rak811):
                 posBandWidths = {125:0, 250:1, 500:2}
                 self.bandwidth=posBandWidths.get(self.bandwidth, 0)
                 # control spreading
-                if self.spread < 6 or self.spread > 12:
-                    self.spread = 6
+                if self.spread < 7 or self.spread > 12:
+                    self.spread = 7
                 # control codingrate
                 if self.coderate < 1 or self.coderate > 4:
                     self.coderate = 1
