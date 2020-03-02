@@ -6,8 +6,8 @@ import ujson
 import sys
 
 # MQTT broker IP
-BROKER = "192.168.1.22"
-#BROKER = "172.24.0.100"
+#BROKER = "192.168.1.22"
+BROKER = "172.24.0.100"
 DEBUG = True
 
 # connect to Wifi
@@ -77,7 +77,7 @@ try:
             # example message :
             # {"id":"000","DHT11_humidity":"46.8","DHT11_temperature":"23.0","bat":"5.661562","datasetId":"254"}
             # one of the 6 nodes contains new data
-            if ["datasetId"] != prev[js["id"]]:
+            if js["datasetId"] != prev[js["id"]]:
                 mqtt_cl.publish(js["id"] + "/temp", js["DHT11_temperature"])
                 utime.sleep_ms(50)
                 mqtt_cl.publish(js["id"] + "/hum", js["DHT11_humidity"])
