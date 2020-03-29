@@ -74,7 +74,7 @@ class ebyteE32:
     # 20dBm = 100mW - 27dBm = 500 mW - 30dBm = 1000 mW (1 W)
     MAXPOW = { 'T20':0, 'T27':1, 'T30':2 }
     # transmission mode
-    TRANSMODE = { 0:'transparent', 1:'fixed' }
+    TRANSMODE = { 0:'broadcast', 1:'fixed' }
     # IO drive mode
     IOMODE = { 0:'TXD AUX floating output, RXD floating input',
                1:'TXD AUX push-pull output, RXD pull-up input' }
@@ -101,7 +101,7 @@ class ebyteE32:
         self.config['datarate'] = AirDataRate      # wireless baudrate (default 2.4k)
         self.config['address'] = Address           # target address (default 0x0000)
         self.config['channel'] = Channel           # target channel (0-31, default 0x06)
-        self.config['frequency'] = 868             # frequency for channel 6 (862 + 6 = 868MHz)
+        self.calcFrequency()                       # calculate frequency (min frequency + channel*1 MHz)
         self.config['transmode'] = 0               # transmission mode (default 0 - tranparent)
         self.config['iomode'] = 1                  # IO mode (default 1 = not floating)
         self.config['wutime'] = 0                  # wakeup time from sleep mode (default 0 = 250ms)
@@ -134,8 +134,6 @@ class ebyteE32:
                 self.config['datarate'] = '2.4k'
             if self.config['channel'] > 31:
                 self.config['channel'] = 31
-            # calculate frequency (= minimum frequency + channel * 1MHz)
-            self.calcFrequency()
             # make UART instance
             self.serdev = UART(ebyteE32.PORT.get(self.config['port']))
             # init UART
@@ -149,10 +147,10 @@ class ebyteE32:
             self.AUX = Pin(self.PinAUX, Pin.IN, Pin.PULL_UP)
             if self.debug:
                 print(self.M0, self.M1, self.AUX)
-            # save config to json file
-            self.saveConfigToJson()
             # set config to the ebyte E32 LoRa module
             self.setConfig('setConfigPwrDwnSave')
+            # save config to json file
+            self.saveConfigToJson()
             return "OK"
         
         except Exception as E:
@@ -162,21 +160,31 @@ class ebyteE32:
         
     
     def sendMessage(self, address, channel, message):
-        ''' Send the message to ebyte ES32 LoRa modules with this address and channel.
+        ''' Send the message to ebyte E32 LoRa modules with this address and channel.
             if the address is 0xFFFF or 0x0000, the message is broadcasted to all modules with this channel'''
         try:
-            # put into normal mode
-            self.setOperationMode('normal')
+            # type of message ?
+            if address in [0x0000, 0xFFFF]:   # broadcast
+                self.setTransmissionMode(0)
+            else:                             # point to point 
+                self.setTransmissionMode(1)
+            # channel/frequency
+            # self.setChannel(channel)
+            # put into wakeup mode (includes preamble signals to wake up device in powersave or sleep mode)
+            self.setOperationMode('wakeup')
             self.waitForDeviceIdle()
             # encode message
             msg = []
-            msg.append(address//256)     # high address byte
-            msg.append(address%256)      # low address byte
-            msg.append(channel)          # channel
-            for i in len(message):       # message
-                msg.append(ord(message[i]))
+            msg.append(address//256)          # high address byte
+            msg.append(address%256)           # low address byte
+            msg.append(channel)               # channel
+            for i in range(len(message)):     # message
+                msg.append(ord(message[i]))   # ascii code of character
+            # debug
+            if self.debug:
+                print(msg)
             # send the message
-            self.serdev.write(bytes(message))
+            self.serdev.write(bytes(msg))
             return "OK"
         
         except Exception as E:
@@ -186,8 +194,35 @@ class ebyteE32:
         
         
     def recvMessage(self, address, channel):
-        ''' Receive messages from ebyte ES32 LoRa modules with this address and channel.
+        ''' Receive messages from ebyte E32 LoRa modules with this address and channel.
             if the address is 0xFFFF or 0x0000, receives messages from all modules with this channel'''
+        try:
+            # type of message ?
+            if address in [0x0000, 0xFFFF]:   # broadcast
+                self.setTransmissionMode(0)
+            else:                             # point to point 
+                self.setTransmissionMode(1)    
+            # put into normal mode
+            self.setOperationMode('normal')
+            self.waitForDeviceIdle()
+            # receive message
+            message = self.serdev.read()
+            # debug
+            if self.debug:
+                print(message)
+            # decode message
+            '''msg = []
+            msg.append(address//256)          # high address byte
+            msg.append(address%256)           # low address byte
+            msg.append(channel)               # channel
+            for i in range(len(message)):     # message
+                msg.append(ord(message[i]))   # ascii code of character  '''
+            return "OK"
+        
+        except Exception as E:
+            if self.debug:
+                print('Error on recvMessage: ',E)
+            return "NOK"
         pass        
 
     
@@ -234,6 +269,8 @@ class ebyteE32:
                 HexCmd[0] = header
             else:                             # get config, get version, reset
                 HexCmd = [HexCmd]*3
+            if self.debug:
+                print(HexCmd)
             self.serdev.write(bytes(HexCmd))
             self.waitForDeviceIdle()
             # read result
@@ -241,7 +278,8 @@ class ebyteE32:
                 result = ''
             else:
                 result = self.serdev.read()
-                print(result)
+                if self.debug:
+                    print(result)
                 self.waitForDeviceIdle()            
             return result
         
@@ -370,7 +408,7 @@ class ebyteE32:
 
     def waitForDeviceIdle(self):
         ''' Wait for the E32 LoRa module to become idle (AUX pin high) '''
-        utime.sleep_ms(50)
+        utime.sleep_ms(100)
         
             
     def saveConfigToJson(self):
@@ -384,14 +422,10 @@ class ebyteE32:
         with open('E32config.json', 'r') as infile:
             result = ujson.load(infile)
         print(self.config)
-        print(result)
         
     
     def calcFrequency(self):
         ''' Calculate the frequency (= minimum frequency + channel * 1MHz)''' 
-        # save old frequency & channel
-        oldfreq = self.config['frequency']
-        oldchan = self.config['channel']
         # get minimum and maximum frequency
         freqkey = int(self.config['model'].split('T')[0])
         minfreq = ebyteE32.FREQ.get(freqkey)[0]
@@ -403,9 +437,6 @@ class ebyteE32:
             self.config['channel'] = hex(maxfreq - minfreq)
         else:
             self.config['frequency'] = freq
-        # update config ?
-        if (self.config['frequency'] != oldfreq) or (self.config['channel'] != oldchan):
-            self.setConfig('setConfigPwrDwnSave')
 
         
     def setFrequency(self, frequency):
@@ -426,9 +457,17 @@ class ebyteE32:
         ''' Set the channel of the E32 LoRa module '''
         if channel != self.config['channel']:
             self.config['channel'] = channel
+            self.calcFrequency()
             self.setConfig('setConfigPwrDwnSave')
     
     
+    def setTransmissionMode(self, transmode):
+        ''' Set the transmission mode of the E32 LoRa module '''
+        if transmode != self.config['transmode']:
+            self.config['transmode'] = transmode
+            self.setConfig('setConfigPwrDwnSave')
+            
+            
     def setConfig(self, save_cmd):
         ''' Set config parameters for the ebyte E32 LoRa module '''
         try:
@@ -441,6 +480,8 @@ class ebyteE32:
             self.decodeConfig(res)
             # show config
             self.showConfig()
+            # save config to json file
+            self.saveConfigToJson()
             return "OK"
         
         except Exception as E:
