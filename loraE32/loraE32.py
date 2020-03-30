@@ -74,7 +74,7 @@ class ebyteE32:
     # 20dBm = 100mW - 27dBm = 500 mW - 30dBm = 1000 mW (1 W)
     MAXPOW = { 'T20':0, 'T27':1, 'T30':2 }
     # transmission mode
-    TRANSMODE = { 0:'broadcast', 1:'fixed' }
+    TRANSMODE = { 0:'transparent', 1:'fixed' }
     # IO drive mode
     IOMODE = { 0:'TXD AUX floating output, RXD floating input',
                1:'TXD AUX push-pull output, RXD pull-up input' }
@@ -158,28 +158,34 @@ class ebyteE32:
                 print("error on start UART", E)
             return "NOK"
         
-    
-    def sendMessage(self, address, channel, message):
-        ''' Send the message to ebyte E32 LoRa modules with this address and channel.
-            if the address is 0xFFFF or 0x0000, the message is broadcasted to all modules with this channel'''
+  
+    def sendMessage(self, to_address, to_channel, message):
+        ''' Send the message to ebyte E32 LoRa modules in transparent or fixed mode.
+            - transparent mode : all modules with the same address and channel of the transmitter will receive the message
+            - fixed mode : only the module with the address and channel of the message will receive;
+                           if the address is 0xFFFF all modules with the same channel will receive the message'''
         try:
-            # type of message ?
-            if address in [0x0000, 0xFFFF]:   # broadcast
+            # type of transmission
+            if (to_address == self.config['address']) and (to_channel == self.config['channel']):
+                # transparent transmission mode
+                # all modules with the same address and channel will receive the message
                 self.setTransmissionMode(0)
-            else:                             # point to point 
+            else:
+                # fixed transmission mode
+                # only the module with the target address and channel will receive the message
                 self.setTransmissionMode(1)
-            # channel/frequency
-            # self.setChannel(channel)
+                self.setChannel(to_channel)
             # put into wakeup mode (includes preamble signals to wake up device in powersave or sleep mode)
             self.setOperationMode('wakeup')
             self.waitForDeviceIdle()
             # encode message
             msg = []
-            msg.append(address//256)          # high address byte
-            msg.append(address%256)           # low address byte
-            msg.append(channel)               # channel
-            for i in range(len(message)):     # message
-                msg.append(ord(message[i]))   # ascii code of character
+            if self.config['transmode'] == 1:     # only for fixed transmission mode
+                msg.append(to_address//256)          # high address byte
+                msg.append(to_address%256)           # low address byte
+                msg.append(to_channel)               # channel
+            for i in range(len(message)):         # message
+                msg.append(ord(message[i]))       # ascii code of character
             # debug
             if self.debug:
                 print(msg)
@@ -193,37 +199,45 @@ class ebyteE32:
             return "NOK"
         
         
-    def recvMessage(self, address, channel):
-        ''' Receive messages from ebyte E32 LoRa modules with this address and channel.
-            if the address is 0xFFFF or 0x0000, receives messages from all modules with this channel'''
+    def recvMessage(self, from_address, from_channel):
+        ''' Receive messages from ebyte E32 LoRa modules in transparent or fixed mode.
+            - transparent mode : message will be received if the module has the same address and channel of the transmitter
+            - fixed mode : only messages from transmitters with this address and channel will be received;
+                           if the address is 0xFFFF messages from all transmitters with this channel will be received'''
         try:
-            # type of message ?
-            if address in [0x0000, 0xFFFF]:   # broadcast
+            # type of transmission
+            if (from_address == self.config['address']) and (from_channel == self.config['channel']):
+                # transparent transmission mode
+                # all modules with the same address and channel will receive the message
                 self.setTransmissionMode(0)
-            else:                             # point to point 
-                self.setTransmissionMode(1)    
+            else:
+                # fixed transmission mode
+                # only the module with the target address and channel will receive the message
+                self.setTransmissionMode(1)
+                self.setChannel(from_channel)
             # put into normal mode
             self.setOperationMode('normal')
             self.waitForDeviceIdle()
             # receive message
-            message = self.serdev.read()
+            msg = self.serdev.read()
             # debug
             if self.debug:
-                print(message)
-            # decode message
-            '''msg = []
-            msg.append(address//256)          # high address byte
-            msg.append(address%256)           # low address byte
-            msg.append(channel)               # channel
-            for i in range(len(message)):     # message
-                msg.append(ord(message[i]))   # ascii code of character  '''
-            return "OK"
+                print(msg)
+            # did we receive anything ?
+            if msg == None:
+                # nothing
+                return 'No message'
+            else :
+                # decode message
+                message = ''
+                for i in range(len(msg)):
+                    message += chr(msg[i])
+                return message
         
         except Exception as E:
             if self.debug:
                 print('Error on recvMessage: ',E)
             return "NOK"
-        pass        
 
     
     def reset(self):
