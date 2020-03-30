@@ -1,5 +1,5 @@
 ###########################################
-# receiving broadcast
+# receiving broadcast (address 0xFFFF)
 # transmitter - address 0001 - channel 04
 # receiver(s) - address xxxx - channel 04
 ###########################################
