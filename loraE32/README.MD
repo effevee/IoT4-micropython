@@ -1,8 +1,8 @@
-#Ebyte E32 series LoRa modules
+# Ebyte E32 series LoRa modules
 
 ## E32-868T20D
 
-![E32-868T20D](/images/E32868T20D.jpg)
+![E32-868T20D](images/E32868T20D.jpg)
 
 ### Features
 E32-868T20D is a wireless serial port module (UART) based on SEMTECH's SX1276 RF chip. It has multiple transmission modes working in the 862MHz~893MHz range (default 868MHz).
@@ -18,7 +18,7 @@ E32-868T20D is a wireless serial port module (UART) based on SEMTECH's SX1276 RF
 
 ### Pin layout
 
-![E32-868T20D](/images/E32868T20D_pinout.jpg)
+![E32-868T20D](images/E32868T20D_pinout.jpg)
 
 No|Pin|Description
 --|---|-----------
@@ -49,7 +49,7 @@ The default channel number for the E32-868T20D module is 6, so the working frequ
 
 ### Transmission modes
 
-![E32-868T20D](/images/E32868T20D_transmodes.jpg)
+![E32-868T20D](images/E32868T20D_transmodes.jpg) 
 
 1. __Transparent transmission__
 All modules have the same address and channel and can send/receive 
@@ -61,11 +61,11 @@ All modules can have different addresses and channels. The transmission messages
 
     1. __Fixed transmission P2P__
     The transmitted message has the address and channel information of the receiver. Only this module will receive the message. This is a point to point transmission between 2 modules.
-    ![E32-868T20D](/images/E32868T20D_fixed_P2P.jpg)
+    ![E32-868T20D](images/E32868T20D_fixed_P2P.jpg)
 
     1. __Fixed transmission broadcast__
     The transmitted message has address FFFF and a channel. All modules with any address and the same channel will receive the message.
-    ![E32-868T20D](/images/E32868T20D_fixed_Broadcast.jpg)
+    ![E32-868T20D](images/E32868T20D_fixed_Broadcast.jpg)
 
     1. __Fixed transmission monitoring__
     The receiver has adress FFFF and a channel. It will receive messages from all modules with any address and the same channel.
@@ -86,10 +86,18 @@ No|Command|Description
 
 #### Configuration bytes
 
-No|Byte|Description|Remark
--|-----|-----------|------
-0|HEAD|Header| C0 = persistent save - C2 = temporary save
-1|ADDH|Address high byte|0x00-0xFF (default 0x00)
-2|ADDL|Adresss low byte|0x00-0xFF (default 0x00)
-3|SPED|bit 7-6 : UART parity / bit 5-3 : UART baudrate / bit 2-0 : Air data rate|
-|||
+![E32-868T20D](images/E32868T20D_config.jpg)
+
+#### Version bytes
+
+No|Item|Description|Remark
+--|----|-----------|------
+0|HEAD|Header|0xC3
+1|FREQ|Frequency (MHz)|0x32=433, 0x38=470, 0x45=868, 0x44=915, 0x46=170
+2|VERS|Version number|0x0D
+3|FEAT|Features number|0x14
+
+### Test setup with ESP32
+
+
+__Because the ESP32 is 3.3V, no voltage dividers are necessary to communicate with the E32 LoRa module__
