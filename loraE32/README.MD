@@ -96,7 +96,7 @@ No|Item|Description|Remark
 2|VERS|Version number|0x0D
 3|FEAT|Features number|0x14
 
-### Test setup with ESP32
+## Test setup with ESP32
 
 ![E32-868T20D](images/E32868T20D_test_setup.jpg)
 
@@ -115,5 +115,86 @@ GND|black|GND
 * Because both the ESP32 and the E32 LoRa module are 3.3V compliant, no voltage dividers are necessary for communication.
 * To stabilize the power supply for the E32 LoRa module, an electrolytic capacitor of 100 µF is placed on the power rail of the breadboard.
 
-### MicroPython class
+## MicroPython code
 
+### class
+```
+class ebyteE32:
+    ''' class to interface an ESP32 via serial commands to the EBYTE
+        E32 Series LoRa modules '''
+```
+### constructor
+```
+def __init__(self, PinM0, PinM1, PinAUX, Model='868T20D', Port='U1', Baudrate=9600, Parity='8N1', AirDataRate='2.4k', Address=0x0000, Channel=0x06, debug=False):
+    ''' constructor for ebyte E32 LoRa module '''
+```
+
+### methods
+```
+def start(self):
+    ''' Start the ebyte E32 LoRa module '''
+
+def sendMessage(self, to_address, to_channel, message):
+    ''' Send the message to ebyte E32 LoRa modules in transparent or fixed mode.
+        - transparent mode : all modules with the same address and channel of the transmitter will receive the message
+        - fixed mode : only the module with the address and channel of the message will receive; if the address is 0xFFFF all modules with the same channel will receive the message'''
+
+def recvMessage(self, from_address, from_channel):
+    ''' Receive messages from ebyte E32 LoRa modules in transparent or fixed mode.
+    - transparent mode : message will be received if the module has the same address and channel of the transmitter
+    - fixed mode : only messages from transmitters with this address and channel will be received; if the address is 0xFFFF messages from all transmitters with this channel will be received'''
+
+def reset(self):
+    ''' Reset the ebyte E32 Lora module '''
+
+def stop(self):
+    ''' Stop the ebyte E32 LoRa module '''
+
+def sendCommand(self, command):
+    ''' Send a command to the ebyte E32 LoRa module. The module has to be in sleep mode '''
+
+def getVersion(self):
+    ''' Get the version info from the ebyte E32 LoRa module '''
+
+def getConfig(self):
+    ''' Get config parameters from the ebyte E32 LoRa module '''
+
+def decodeConfig(self, message):
+    ''' decode the config message from the ebyte E32 LoRa module to update the config dictionary '''
+
+def encodeConfig(self):
+    ''' encode the config dictionary to create the config message of the ebyte E32 LoRa module '''
+
+def showConfig(self):
+    ''' Show the config parameters of the ebyte E32 LoRa module on the shell '''
+
+def waitForDeviceIdle(self):
+    ''' Wait for the E32 LoRa module to become idle (AUX pin high) '''
+
+def saveConfigToJson(self):
+    ''' Save config dictionary to JSON file ''' 
+
+def loadConfigFromJson(self):
+    ''' Load config dictionary from JSON file ''' 
+
+def calcFrequency(self):
+    ''' Calculate the frequency (= minimum frequency + channel * 1MHz)''' 
+
+def setFrequency(self, frequency):
+    ''' Set the frequency of the ebyte E32 LoRa module '''
+
+def setAddress(self, address):
+    ''' Set the address of the E32 LoRa module '''
+
+def setChannel(self, channel):
+    ''' Set the channel of the E32 LoRa module '''
+
+def setTransmissionMode(self, transmode):
+    ''' Set the transmission mode of the E32 LoRa module '''
+
+def setConfig(self, save_cmd):
+    ''' Set config parameters for the ebyte E32 LoRa module '''
+
+def setOperationMode(self, mode):
+    ''' Set operation mode of the E32 LoRa module '''
+```
