@@ -1,7 +1,9 @@
 ###########################################
-# receiving broadcast (address 0xFFFF)
-# transmitter - address 0001 - channel 04
-# receiver(s) - address xxxx - channel 04
+# receiving fixed broadcast
+###########################################
+# transmitter - address 0001 - channel 02
+# message     - address FFFF - channel 04
+# receiver(s) - address 0003 - channel 04
 ###########################################
 
 from loraE32 import ebyteE32
@@ -19,7 +21,7 @@ from_address = 0xFFFF
 from_channel = 0x04
 
 while True:
-    print('Receiving broadcast : address %d - channel %d'%(from_address, from_channel), end='')
+    print('Receiving fixed broadcast : address %d - channel %d'%(from_address, from_channel), end='')
     message = e32.recvMessage(from_address, from_channel)
     print(' - message %s'%(message))
     utime.sleep_ms(2000)

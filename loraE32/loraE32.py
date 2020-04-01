@@ -5,6 +5,7 @@
 # They all use a simple UART interface to control the device.
 #
 # Pin layout E32-868T20D (SX1276 868MHz 100mW DIP Wireless Module)
+# ======================
 # +---------------------------------------------+
 # | 0 - M0  (set mode)        [*]               |
 # | 0 - M1  (set mode)        [*]               |
@@ -17,20 +18,44 @@
 #     [*] ALL COMMUNICATION PINS ARE 3.3V !!!
 #
 # Transmission modes :
-#   - Fixed : point to point - sender uses target address and target
-#             channel of receiver
-#   - Broadcast : sender uses 0xFFFF address and target channel, all
-#             receivers this channel see the message
-#   - Monitor : receiver with address of 0xFFFF or 0x0000 and target
-#             channel will receive data from all senders with this channel
+# ==================
+#   - Transparent : all modules have the same address and channel and
+#        can send/receive messages to/from each other. No address and
+#        channel is included in the message.
+#
+#   - Fixed : all modules can have different addresses and channels.
+#        The transmission messages are prefixed with the destination address
+#        and channel information. If these differ from the settings of the
+#        transmitter, then the configuration of the module will be changed
+#        before the transmission. After the transmission is complete,
+#        the transmitter will revert to its prior configuration.
+#
+#        1. Fixed P2P : The transmitted message has the address and channel
+#           information of the receiver. Only this module will receive the message.
+#           This is a point to point transmission between 2 modules.
+#
+#        2. Fixed Broadcast : The transmitted message has address FFFF and a
+#           channel. All modules with any address and the same channel of
+#           the message will receive it.
+#             
+#        3. Fixed Monitor : The receiver has adress FFFF and a channel.
+#           It will receive messages from all modules with any address and
+#           the same channel as the receiver.
 #
 # Operating modes :
-#   - 0=Normal (M0=0,M1=0) : UART and wireless open
-#   - 1=wake up (M0=1,M1=0) : UART and wireless open, before transmit
-#             receiver will be woken with preamble pulses
-#   - 2=power save (M0=0,M1=1) : UART closed, wireless open, when
-#             receiving data UART comes up to send the data to RXD pin
-#   - 3=sleep (M0=1,M1=1) : sleep mode used to setup device
+# ===============
+#   - 0=Normal (M0=0,M1=0) : UART and LoRa radio are on.
+#
+#   - 1=wake up (M0=1,M1=0) : Same as normal but preamble code is added to
+#             transmitted data to wake up the receiver.
+#
+#   - 2=power save (M0=0,M1=1) : UART is off, LoRa radio is on WOR(wake on radio) mode
+#             which means the device will turn on when there is data to be received.
+#             Transmission is not allowed.
+#
+#   - 3=sleep (M0=1,M1=1) : UART is on, LoRa radio is off. Is used to
+#             get/set module parameters or to reset the module.
+#
 ######################################################################
 
 from machine import Pin, UART
@@ -163,7 +188,7 @@ class ebyteE32:
         ''' Send the message to ebyte E32 LoRa modules in transparent or fixed mode.
             - transparent mode : all modules with the same address and channel of the transmitter will receive the message
             - fixed mode : only the module with the address and channel of the message will receive;
-                           if the address is 0xFFFF all modules with the same channel will receive the message'''
+                           if the message address is 0xFFFF all modules with the same channel will receive the message'''
         try:
             # type of transmission
             if (to_address == self.config['address']) and (to_channel == self.config['channel']):
@@ -174,7 +199,6 @@ class ebyteE32:
                 # fixed transmission mode
                 # only the module with the target address and channel will receive the message
                 self.setTransmissionMode(1)
-                self.setChannel(to_channel)
             # put into wakeup mode (includes preamble signals to wake up device in powersave or sleep mode)
             self.setOperationMode('wakeup')
             self.waitForDeviceIdle()
@@ -203,7 +227,7 @@ class ebyteE32:
         ''' Receive messages from ebyte E32 LoRa modules in transparent or fixed mode.
             - transparent mode : message will be received if the module has the same address and channel of the transmitter
             - fixed mode : only messages from transmitters with this address and channel will be received;
-                           if the address is 0xFFFF messages from all transmitters with this channel will be received'''
+                           if the message address is 0xFFFF, messages from all transmitters with this channel will be received'''
         try:
             # type of transmission
             if (from_address == self.config['address']) and (from_channel == self.config['channel']):
@@ -214,7 +238,6 @@ class ebyteE32:
                 # fixed transmission mode
                 # only the module with the target address and channel will receive the message
                 self.setTransmissionMode(1)
-                self.setChannel(from_channel)
             # put into normal mode
             self.setOperationMode('normal')
             self.waitForDeviceIdle()
