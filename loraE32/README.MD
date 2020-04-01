@@ -66,7 +66,7 @@ All modules can have different addresses and channels. The transmission messages
     ![E32-868T20D](images/E32868T20D_fixed_Broadcast.jpg)
 
     - __Fixed transmission monitoring__\
-    The receiver has adress FFFF and a channel. It will receive messages from all modules with any address and the same channel as the receiver.\
+    The receiver has adress FFFF and a channel. It will receive messages from all modules with any address and the same channel as the receiver.
 
 ### Module configuration
 
@@ -196,3 +196,12 @@ def setConfig(self, save_cmd):
 def setOperationMode(self, mode):
     ''' Set operation mode of the E32 LoRa module '''
 ```
+### test code
+
+Transmission mode|Transmitter|Receiver
+:---:|:----:|:----:
+transparent|[code](testSendE32_Transparent.py)|[code](testRecvE32_Transparent.py)
+|fixed P2P|[code](testSendE32_P2P.py)|[code](testRecvE32_P2P.py)
+|fixed broadcast|[code](testSendE32_Broadcast.py)|[code](testRecvE32_Broadcast.py)
+|fixed monitor|[code](testSendE32_Monitor.py)|[code](testRecvE32_Monitor.py)
+
