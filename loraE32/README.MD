@@ -21,7 +21,7 @@ E32-868T20D is a wireless serial port module (UART) based on SEMTECH's SX1276 RF
 ![E32-868T20D](images/E32868T20D_pinout.jpg)
 
 No|Pin|Description
---|---|-----------
+:--:|:--:|-----------
 1|M0*|Work with M1 to set 1 of 4 operating modes.
 2|M1*|Work with M0 to set 1 of 4 operating modes.
 3|RXD*|TTL UART input. Can be configured as open-drain or pull-up input.
@@ -35,7 +35,7 @@ __* All communication pins are 3.3V only !!!__
 ### Operating modes
 
 No|Mode|M1|M0|Description
---|----|--|--|-----------
+:--:|:--:|:--:|:--:|-----------
 0|Normal|0|0|UART and LoRa radio are on.
 1|Wake Up|0|1|Same as normal but preamble code is added to transmitted data to wake up the receiver.
 2|Power Save|1|0|UART is off, LoRa radio is on WOR(wake on radio) mode which means the device will turn on when there is data to be received. Transmission is not allowed.
@@ -74,7 +74,7 @@ All modules can have different addresses and channels. The transmission messages
 The module can only be configured when in __sleep operating mode__ (M0 high & M1 high). __The UART baudrate has to be 9600 and parity 8N1.__
 
 No|Command|Description
---|-------|-----------
+:--:|:--:|-----------
 1|C0 + config*|Set the configuration persistently. Send C0 + 5 configuration bytes in hex format.
 2|C1+C1+C1|Get the module configuration. Send 3x C1 in hex format.
 3|C2 + config*|Set the configuration temporary. Send C2 + 5 configuration bytes in hex format.
@@ -90,7 +90,7 @@ No|Command|Description
 #### Version bytes
 
 No|Item|Description|Remark
---|----|-----------|------
+:--:|:--:|-----------|------
 0|HEAD|Header|0xC3
 1|FREQ|Frequency (MHz)|0x32=433, 0x38=470, 0x45=868, 0x44=915, 0x46=170
 2|VERS|Version number|0x0D
@@ -102,7 +102,7 @@ No|Item|Description|Remark
 
 
 E32 Pin|Wire|ESP32 pin
----------------|----|---------
+:-----:|:--:|:-------:
 M0|cyan|GPIO25
 M1|cyan|GPIO26
 RXD|yellow|SD3 (UART1-TXD)
