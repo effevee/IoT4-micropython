@@ -59,11 +59,11 @@ All modules can have different addresses and channels. The transmission messages
 
     - __Fixed transmission P2P__\
     The transmitted message has the address and channel information of the receiver. Only this module will receive the message. This is a point to point transmission between 2 modules.
-    ![E32-868T20D](images/E32868T20D_fixed_P2P.jpg)
+        ![E32-868T20D](images/E32868T20D_fixed_P2P.jpg)
 
     - __Fixed transmission broadcast__\
     The transmitted message has address FFFF and a channel.  All modules with any address and the same channel of the message will receive it.
-    ![E32-868T20D](images/E32868T20D_fixed_Broadcast.jpg)
+        ![E32-868T20D](images/E32868T20D_fixed_Broadcast.jpg)
 
     - __Fixed transmission monitoring__\
     The receiver has adress FFFF and a channel. It will receive messages from all modules with any address and the same channel as the receiver.
