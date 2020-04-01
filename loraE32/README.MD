@@ -1,6 +1,10 @@
-# Ebyte E32 series LoRa modules
+# EBYTE E32 series LoRa modules
+
+[User manual EBYTE E32 series](resources/E32_Usermanual_EN_v1.30.pdf)
 
 ## E32-868T20D
+
+[User manual EBYTE E32-868T20D](resources/E32-868T20D_Usermanual_EN_v1.5.pdf)
 
 ![E32-868T20D](images/E32868T20D.jpg)
 
@@ -75,12 +79,13 @@ The module can only be configured when in __sleep operating mode__ (M0 high & M1
 No|Command|Description
 :--:|:--:|-----------
 1|C0 + config*|Set the configuration persistently. Send C0 + 5 configuration bytes in hex format.
-2|C1+C1+C1|Get the module configuration. Send 3x C1 in hex format.
+2|C1+C1+C1*|Get the module configuration. Send 3x C1 in hex format.
 3|C2 + config*|Set the configuration temporary. Send C2 + 5 configuration bytes in hex format.
-4|C3+C3+C3|Get the module version information. Send 3x C3 in hex format.
+4|C3+C3+C3**|Get the module version information. Send 3x C3 in hex format.
 5|C4+C4+C4|Reset the module
 
-* Default configuration parameters for E32-868T20D : __C0 00 00 1A 06 44__
+(*) Default configuration bytes for E32-868T20D : __C0 00 00 1A 06 44__
+(**) Default version bytes for E32-868T20D : __C3 45 0D 14__
 
 #### Configuration bytes
 
