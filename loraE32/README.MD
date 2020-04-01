@@ -62,7 +62,7 @@ All modules can have different addresses and channels. The transmission messages
     ![E32-868T20D](images/E32868T20D_fixed_P2P.jpg)
 
     - __Fixed transmission broadcast__\
-    The transmitted message has address FFFF and a channel. All modules with any address and the same channel of the message will receive it.
+    The transmitted message has address FFFF and a channel.  All modules with any address and the same channel of the message will receive it.
     ![E32-868T20D](images/E32868T20D_fixed_Broadcast.jpg)
 
     - __Fixed transmission monitoring__\
