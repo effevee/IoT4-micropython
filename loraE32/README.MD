@@ -34,7 +34,7 @@ No|Pin|Description
 6|VCC|Power (2.3~5.5V DC) 	
 7|GND|Ground.
 
-__* All communication pins are 3.3V only !!!__
+__(*) All communication pins are 3.3V only !!!__
 
 ### Operating modes
 
@@ -84,7 +84,7 @@ No|Command|Description
 4|C3+C3+C3**|Get the module version information. Send 3x C3 in hex format.
 5|C4+C4+C4|Reset the module
 
-(*) Default configuration bytes for E32-868T20D : __C0 00 00 1A 06 44__
+(*) Default configuration bytes for E32-868T20D : __C0 00 00 1A 06 44__\
 (**) Default version bytes for E32-868T20D : __C3 45 0D 14__
 
 #### Configuration bytes
