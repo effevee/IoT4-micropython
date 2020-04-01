@@ -201,6 +201,8 @@ def setConfig(self, save_cmd):
 def setOperationMode(self, mode):
     ''' Set operation mode of the E32 LoRa module '''
 ```
+[class ebyteE32 code](loraE32.py)
+
 ### test code
 
 Transmission mode|Transmitter|Receiver
