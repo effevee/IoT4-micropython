@@ -56,19 +56,18 @@ All modules have the same address and channel and can send/receive
 messages to/from each other (demo mode). The messages don't include address and channel information.
 
 1. __Fixed transmission__
-All modules can have different addresses and channels. The transmission messages are prefixed with the destination address and channel information. If these differ from the settings of the transmitter, then the configuration of the module will be changed before the transmission. After the transmission is complete, the configuration of the transmitter will revert to its prior configuration.
+All modules can have different addresses and channels. The transmission messages are prefixed with the destination address and channel information. If these differ from the settings of the transmitter, then the configuration of the module will be changed before the transmission. After the transmission is complete, the transmitter will revert to its prior configuration.
 
-
-    1. __Fixed transmission P2P__
+    - __Fixed transmission P2P__
     The transmitted message has the address and channel information of the receiver. Only this module will receive the message. This is a point to point transmission between 2 modules.
     ![E32-868T20D](images/E32868T20D_fixed_P2P.jpg)
 
-    1. __Fixed transmission broadcast__
-    The transmitted message has address FFFF and a channel. All modules with any address and the same channel will receive the message.
+    - __Fixed transmission broadcast__
+    The transmitted message has address FFFF and a channel. All modules with any address and the same channel of the message will receive it.
     ![E32-868T20D](images/E32868T20D_fixed_Broadcast.jpg)
 
-    1. __Fixed transmission monitoring__
-    The receiver has adress FFFF and a channel. It will receive messages from all modules with any address and the same channel.
+    - __Fixed transmission monitoring__
+    The receiver has adress FFFF and a channel. It will receive messages from all modules with any address and the same channel as the receiver.
 
 ### Module configuration
 
@@ -99,5 +98,22 @@ No|Item|Description|Remark
 
 ### Test setup with ESP32
 
+![E32-868T20D](images/E32868T20D_test_setup.jpg)
 
-__Because the ESP32 is 3.3V, no voltage dividers are necessary to communicate with the E32 LoRa module__
+
+E32 Pin|Wire|ESP32 pin
+---------------|----|---------
+M0|cyan|GPIO25
+M1|cyan|GPIO26
+RXD|yellow|SD3 (UART1-TXD)
+TXD|green|SD2 (UART1-RXD)
+AUX|purple|GPIO27
+VCC|red|3.3V
+GND|black|GND
+
+
+* Because both the ESP32 and the E32 LoRa module are 3.3V compliant, no voltage dividers are necessary for communication.
+* To stabilize the power supply for the E32 LoRa module, an electrolytic capacitor of 100 µF is placed on the power rail of the breadboard.
+
+### MicroPython class
+
