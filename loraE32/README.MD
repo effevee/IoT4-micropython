@@ -51,22 +51,21 @@ The default channel number for the E32-868T20D module is 6, so the working frequ
 
 ![E32-868T20D](images/E32868T20D_transmodes.jpg) 
 
-1. __Transparent transmission__
-All modules have the same address and channel and can send/receive 
-messages to/from each other (demo mode). The messages don't include address and channel information.
+1. __Transparent transmission__\
+All modules have the same address and channel and can send/receive messages to/from each other (demo mode). The messages don't include address and channel information.
 
-1. __Fixed transmission__
+1. __Fixed transmission__\
 All modules can have different addresses and channels. The transmission messages are prefixed with the destination address and channel information. If these differ from the settings of the transmitter, then the configuration of the module will be changed before the transmission. After the transmission is complete, the transmitter will revert to its prior configuration.
 
-    - __Fixed transmission P2P__
+    - __Fixed transmission P2P__\
     The transmitted message has the address and channel information of the receiver. Only this module will receive the message. This is a point to point transmission between 2 modules.
     ![E32-868T20D](images/E32868T20D_fixed_P2P.jpg)
 
-    - __Fixed transmission broadcast__
+    - __Fixed transmission broadcast__\
     The transmitted message has address FFFF and a channel. All modules with any address and the same channel of the message will receive it.
     ![E32-868T20D](images/E32868T20D_fixed_Broadcast.jpg)
 
-    - __Fixed transmission monitoring__
+    - __Fixed transmission monitoring__\
     The receiver has adress FFFF and a channel. It will receive messages from all modules with any address and the same channel as the receiver.
 
 ### Module configuration
