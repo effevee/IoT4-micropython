@@ -120,8 +120,7 @@ GND|black|GND
 ### class
 ```
 class ebyteE32:
-    ''' class to interface an ESP32 via serial commands to the EBYTE
-        E32 Series LoRa modules '''
+    ''' class to interface an ESP32 via serial commands to the EBYTE E32 Series LoRa modules '''
 ```
 ### constructor
 ```
