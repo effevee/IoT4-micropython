@@ -110,7 +110,7 @@ The device is in sleep mode (both M0 and M1 high). Some time after the get versi
 ![E32-868T20D](images/E32868T20D_getversion.jpg)
 
 1. __Command reset device__\
-The device is in sleep mode (both M0 and M1 high). Some time after the reset command is received on the RXD pin of the module, the AUX pin goes low and stays low while the device is resetting. After the module is ready again, the AUX pin goes high. 
+The device is in sleep mode (both M0 and M1 high). Some time after the reset command is received on the RXD pin of the module, the AUX pin goes low and stays low while the device is resetting. After the module is ready again, the AUX pin goes high.
 ![E32-868T20D](images/E32868T20D_reset.jpg)
 
 ### Module configuration
