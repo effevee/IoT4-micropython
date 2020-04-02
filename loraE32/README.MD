@@ -72,6 +72,47 @@ All modules can have different addresses and channels. The transmission messages
     - __Fixed transmission monitoring__\
     The receiver has adress FFFF and a channel. It will receive messages from all modules with any address and the same channel as the receiver.
 
+### Communication pins signal analysis
+
+To make sense of the different communication pins of the E32 LoRa module, a simple [USB logic analyzer](https://www.banggood.com/USB-Logic-Analyzer-24M-8CH-Microcontroller-ARM-FPGA-Debug-Tool-p-1177821.html?rmmds=buy&cur_warehouse=CN) and an [opensource software](https://sigrok.org/wiki/PulseView) comes to the rescue :)\
+I looked at these scenario's :
+
+1. __Transparent transmission__\
+The device is in normal mode (M0 and M1 both low). Some time after the message data is received on the RXD pin of the module, the AUX pin goes low. The AUX pin stays low until all data has been transmitted by the LoRa radio, after which it goes high again.
+![E32-868T20D](images/E32868T20D_transmit_transparent.jpg)
+
+1. __Fixed transmission in normal mode__\
+The device is in normal mode (M0 and M1 both low). Some time after the message data is received on the RXD pin of the module, the AUX pin goes low. The message is prefixed with the address and channel info. The AUX pin stays low until all data has been transmitted by the LoRa radio, after which it goes high again.
+![E32-868T20D](images/E32868T20D_transmit_normal.jpg)
+
+1. __Fixed transmission in wakeup mode__\
+The device is in wakeup mode (M0 high, M1 low). Some time after the message data is received on the RXD pin of the module, the AUX pin goes low. The message is prefixed with the preamble wakeup signal, the address and channel info. The AUX pin stays low until all data has been transmitted by the LoRa radio, after which it goes high again.
+![E32-868T20D](images/E32868T20D_transmit_wakeup.jpg)
+
+1. __Receiving__\
+The device is in normal mode (M0 and M1 both low). When the LoRa radio receives a signal, the AUX pin goes low. The AUX pin stays low until all data has been sent to the TXD pin, after which it goes high again.
+![E32-868T20D](images/E32868T20D_receive.jpg)
+
+1. __Command set config with persitent save__\
+The device is in sleep mode (both M0 and M1 high). Some time after the set config command is received on the RXD pin of the module, the AUX pin goes low. After the config response is sent to the TXD pin, the AUX pin goes high. 
+![E32-868T20D](images/E32868T20D_setconfig_save.jpg)
+
+1. __Command set config with temporary save__\
+The device is in sleep mode (both M0 and M1 high). Some time after the set config command is received on the RXD pin of the module, the AUX pin goes low. After the config response is sent to the TXD pin, the AUX pin goes high.
+![E32-868T20D](images/E32868T20D_setconfig_nosave.jpg)
+
+1. __Command get config__\
+The device is in sleep mode (both M0 and M1 high). Some time after the get config command is received on the RXD pin of the module, the AUX pin goes low. After the config response is sent to the TXD pin, the AUX pin goes high. 
+![E32-868T20D](images/E32868T20D_getconfig.jpg)
+
+1. __Command get version__\
+The device is in sleep mode (both M0 and M1 high). Some time after the get version command is received on the RXD pin of the module, the AUX pin goes low. After the version response is sent to the TXD pin, the AUX pin goes high. 
+![E32-868T20D](images/E32868T20D_getversion.jpg)
+
+1. __Command reset device__\
+The device is in sleep mode (both M0 and M1 high). Some time after the reset command is received on the RXD pin of the module, the AUX pin goes low and stays low while the device is resetting. After the module is ready again, the AUX pin goes high. 
+![E32-868T20D](images/E32868T20D_reset.jpg)
+
 ### Module configuration
 
 The module can only be configured when in __sleep operating mode__ (M0 high & M1 high). __The UART baudrate has to be 9600 and parity 8N1.__
