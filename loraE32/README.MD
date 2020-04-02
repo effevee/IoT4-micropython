@@ -72,6 +72,35 @@ All modules can have different addresses and channels. The transmission messages
     - __Fixed transmission monitoring__\
     The receiver has adress FFFF and a channel. It will receive messages from all modules with any address and the same channel as the receiver.
 
+
+### Module configuration
+
+The module can only be configured when in __sleep operating mode__ (M0 high & M1 high). __The UART baudrate has to be 9600 and parity 8N1.__
+
+No|Command|Description
+:--:|:--:|-----------
+1|C0 + config*|Set the configuration persistently. Send C0 + 5 configuration bytes in hex format.
+2|C1+C1+C1*|Get the module configuration. Send 3x C1 in hex format.
+3|C2 + config*|Set the configuration temporary. Send C2 + 5 configuration bytes in hex format.
+4|C3+C3+C3**|Get the module version information. Send 3x C3 in hex format.
+5|C4+C4+C4|Reset the module
+
+(*) Default configuration bytes for E32-868T20D : __C0 00 00 1A 06 44__\
+(**) Default version bytes for E32-868T20D : __C3 45 0D 14__
+
+#### Configuration bytes
+
+![E32-868T20D](images/E32868T20D_config.jpg)
+
+#### Version bytes
+
+No|Item|Description|Remark
+:--:|:--:|-----------|------
+0|HEAD|Header|0xC3
+1|FREQ|Frequency (MHz)|0x32=433, 0x38=470, 0x45=868, 0x44=915, 0x46=170
+2|VERS|Version number|0x0D
+3|FEAT|Features number|0x14
+
 ### Communication pins signal analysis
 
 To make sense of the different communication pins of the E32 LoRa module, a simple [USB logic analyzer](https://www.banggood.com/USB-Logic-Analyzer-24M-8CH-Microcontroller-ARM-FPGA-Debug-Tool-p-1177821.html?rmmds=buy&cur_warehouse=CN) and an [opensource software](https://sigrok.org/wiki/PulseView) comes to the rescue :)\
@@ -112,34 +141,6 @@ The device is in sleep mode (both M0 and M1 high). Some time after the get versi
 1. __Command reset device__\
 The device is in sleep mode (both M0 and M1 high). Some time after the reset command is received on the RXD pin of the module, the AUX pin goes low and stays low while the device is resetting. After the module is ready again, the AUX pin goes high.\
 ![E32-868T20D](images/E32868T20D_reset.jpg)
-
-### Module configuration
-
-The module can only be configured when in __sleep operating mode__ (M0 high & M1 high). __The UART baudrate has to be 9600 and parity 8N1.__
-
-No|Command|Description
-:--:|:--:|-----------
-1|C0 + config*|Set the configuration persistently. Send C0 + 5 configuration bytes in hex format.
-2|C1+C1+C1*|Get the module configuration. Send 3x C1 in hex format.
-3|C2 + config*|Set the configuration temporary. Send C2 + 5 configuration bytes in hex format.
-4|C3+C3+C3**|Get the module version information. Send 3x C3 in hex format.
-5|C4+C4+C4|Reset the module
-
-(*) Default configuration bytes for E32-868T20D : __C0 00 00 1A 06 44__\
-(**) Default version bytes for E32-868T20D : __C3 45 0D 14__
-
-#### Configuration bytes
-
-![E32-868T20D](images/E32868T20D_config.jpg)
-
-#### Version bytes
-
-No|Item|Description|Remark
-:--:|:--:|-----------|------
-0|HEAD|Header|0xC3
-1|FREQ|Frequency (MHz)|0x32=433, 0x38=470, 0x45=868, 0x44=915, 0x46=170
-2|VERS|Version number|0x0D
-3|FEAT|Features number|0x14
 
 ## Test setup with ESP32
 
