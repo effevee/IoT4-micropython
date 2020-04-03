@@ -11,6 +11,6 @@ e32.start()
 #e32.getVersion()
 #e32.reset()
 #e32.setConfig('setConfigPwrDwnSave')
-e32.setConfig('setConfigPwrDwnNoSave')
+#e32.setConfig('setConfigPwrDwnNoSave')
 
 e32.stop()

@@ -64,8 +64,7 @@ import ujson
 
 
 class ebyteE32:
-    ''' class to interface an ESP32 via serial commands to the EBYTE
-        E32 Series LoRa modules '''
+    ''' class to interface an ESP32 via serial commands to the EBYTE E32 Series LoRa modules '''
     
     # UART ports
     PORT = { 'U1':1, 'U2':2 }
@@ -201,7 +200,6 @@ class ebyteE32:
                 self.setTransmissionMode(1)
             # put into wakeup mode (includes preamble signals to wake up device in powersave or sleep mode)
             self.setOperationMode('wakeup')
-            self.waitForDeviceIdle()
             # encode message
             msg = []
             if self.config['transmode'] == 1:     # only for fixed transmission mode
@@ -213,6 +211,8 @@ class ebyteE32:
             # debug
             if self.debug:
                 print(msg)
+            # wait for idle module
+            self.waitForDeviceIdle()
             # send the message
             self.serdev.write(bytes(msg))
             return "OK"
@@ -240,7 +240,6 @@ class ebyteE32:
                 self.setTransmissionMode(1)
             # put into normal mode
             self.setOperationMode('normal')
-            self.waitForDeviceIdle()
             # receive message
             msg = self.serdev.read()
             # debug
@@ -297,7 +296,6 @@ class ebyteE32:
         try:
             # put into sleep mode
             self.setOperationMode('sleep')
-            self.waitForDeviceIdle()
             # send command
             HexCmd = ebyteE32.CMDS.get(command)
             if HexCmd in [0xC0, 0xC2]:        # set config to device
@@ -309,15 +307,18 @@ class ebyteE32:
             if self.debug:
                 print(HexCmd)
             self.serdev.write(bytes(HexCmd))
-            self.waitForDeviceIdle()
+            # wait for result
+            utime.sleep_ms(50)
             # read result
             if command == 'reset':
                 result = ''
             else:
                 result = self.serdev.read()
+                # wait for result
+                utime.sleep_ms(50)
+                # debug
                 if self.debug:
                     print(result)
-                self.waitForDeviceIdle()            
             return result
         
         except Exception as E:
@@ -331,18 +332,18 @@ class ebyteE32:
         ''' Get the version info from the ebyte E32 LoRa module '''
         try:
             # send the command
-            res = self.sendCommand('getVersion')
+            result = self.sendCommand('getVersion')
             # check result
-            if len(res) != 4:
+            if len(result) != 4:
                 return "NOK"
             # decode result
-            freq = ebyteE32.FREQV.get(hex(res[1]),'unknown')
+            freq = ebyteE32.FREQV.get(hex(result[1]),'unknown')
             # show version
-            if res[0] == 0xc3:
-                print('=================== VERSION ====================')
-                print('frequency   \t%dMhz'%(freq))
-                print('version     \t%d'%(res[2]))
-                print('features    \t%d'%(res[3]))
+            if result[0] == 0xc3:
+                print('================= E32 MODULE ===================')
+                print('model       \t%dMhz'%(freq))
+                print('version     \t%d'%(result[2]))
+                print('features    \t%d'%(result[3]))
                 print('================================================')
             return "OK"
         
@@ -356,12 +357,12 @@ class ebyteE32:
         ''' Get config parameters from the ebyte E32 LoRa module '''
         try:
             # send the command
-            res = self.sendCommand('getConfig')
+            result = self.sendCommand('getConfig')
             # check result
-            if len(res) != 6:
+            if len(result) != 6:
                 return "NOK"
             # decode result
-            self.decodeConfig(res)
+            self.decodeConfig(result)
             # show config
             self.showConfig()
             return "OK"
@@ -445,8 +446,17 @@ class ebyteE32:
 
     def waitForDeviceIdle(self):
         ''' Wait for the E32 LoRa module to become idle (AUX pin high) '''
-        utime.sleep_ms(100)
-        
+        count = 0
+        # loop for device busy
+        while not self.AUX.value():
+            # increment count
+            count += 1
+            # maximum wait time 100 ms
+            if count == 10:
+                break
+            # sleep for 10 ms
+            utime.sleep_ms(10)
+            
             
     def saveConfigToJson(self):
         ''' Save config dictionary to JSON file ''' 
@@ -476,28 +486,6 @@ class ebyteE32:
             self.config['frequency'] = freq
 
         
-    def setFrequency(self, frequency):
-        ''' Set the frequency of the ebyte E32 LoRa module '''
-        if frequency != self.config['frequency']:
-            self.config['frequency'] = frequency
-            self.setConfig('setConfigPwrDwnSave')
-        
-        
-    def setAddress(self, address):
-        ''' Set the address of the E32 LoRa module '''
-        if address != self.config['address']:
-            self.config['address'] = address
-            self.setConfig('setConfigPwrDwnSave')
-    
-    
-    def setChannel(self, channel):
-        ''' Set the channel of the E32 LoRa module '''
-        if channel != self.config['channel']:
-            self.config['channel'] = channel
-            self.calcFrequency()
-            self.setConfig('setConfigPwrDwnSave')
-    
-    
     def setTransmissionMode(self, transmode):
         ''' Set the transmission mode of the E32 LoRa module '''
         if transmode != self.config['transmode']:
@@ -509,14 +497,16 @@ class ebyteE32:
         ''' Set config parameters for the ebyte E32 LoRa module '''
         try:
             # send the command
-            res = self.sendCommand(save_cmd)
+            result = self.sendCommand(save_cmd)
             # check result
-            if len(res) != 6:
+            if len(result) != 6:
                 return "NOK"
-            # decode result
-            self.decodeConfig(res)
-            # show config
-            self.showConfig()
+            # debug
+            if self.debug:
+                # decode result
+                self.decodeConfig(result)
+                # show config
+                self.showConfig()
             # save config to json file
             self.saveConfigToJson()
             return "OK"
@@ -529,8 +519,6 @@ class ebyteE32:
 
     def setOperationMode(self, mode):
         ''' Set operation mode of the E32 LoRa module '''
-        # wait for the device to become idle
-        self.waitForDeviceIdle()
         # get operation mode settings (default normal)
         bits = ebyteE32.OPERMODE.get(mode, '00')
         # set operation mode
