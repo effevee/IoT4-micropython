@@ -225,15 +225,6 @@ def loadConfigFromJson(self):
 def calcFrequency(self):
     ''' Calculate the frequency (= minimum frequency + channel * 1MHz)''' 
 
-def setFrequency(self, frequency):
-    ''' Set the frequency of the ebyte E32 LoRa module '''
-
-def setAddress(self, address):
-    ''' Set the address of the E32 LoRa module '''
-
-def setChannel(self, channel):
-    ''' Set the channel of the E32 LoRa module '''
-
 def setTransmissionMode(self, transmode):
     ''' Set the transmission mode of the E32 LoRa module '''
 
