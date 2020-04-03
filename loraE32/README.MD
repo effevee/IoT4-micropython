@@ -122,7 +122,7 @@ The device is in wakeup mode (M0 high, M1 low). Some time after the message data
 The device is in normal mode (M0 and M1 both low). When the LoRa radio receives a signal, the AUX pin goes low. The AUX pin stays low until all data has been sent to the TXD pin, after which it goes high again.
 ![E32-868T20D](images/E32868T20D_receive.jpg)
 
-1. __Command set config with persitent save__\
+1. __Command set config with persistent save__\
 The device is in sleep mode (both M0 and M1 high). Some time after the set config command is received on the RXD pin of the module, the AUX pin goes low. After the config response is sent to the TXD pin, the AUX pin goes high. 
 ![E32-868T20D](images/E32868T20D_setconfig_save.jpg)
 
