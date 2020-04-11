@@ -19,12 +19,12 @@ e32.start()
 
 to_address = 0xFFFF
 to_channel = 0x04
-message = "HELLO WORLD "
 
 teller = 0
 while True:
-    print('Sending fixed broadcast : address %s - channel %d - message %s'%(to_address, to_channel, message +str(teller)))
-    e32.sendMessage(to_address, to_channel, message + str(teller))
+    message = 'HELLO WORLD %s'%str(teller)
+    print('Sending fixed broadcast : address %s - channel %d - message %s'%(to_address, to_channel, message))
+    e32.sendMessage(to_address, to_channel, { 'msg':message })
     teller += 1
     utime.sleep_ms(2000)
 

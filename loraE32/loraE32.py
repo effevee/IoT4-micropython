@@ -183,31 +183,37 @@ class ebyteE32:
             return "NOK"
         
   
-    def sendMessage(self, to_address, to_channel, message):
-        ''' Send the message to ebyte E32 LoRa modules in transparent or fixed mode.
-            - transparent mode : all modules with the same address and channel of the transmitter will receive the message
-            - fixed mode : only the module with the address and channel of the message will receive;
-                           if the message address is 0xFFFF all modules with the same channel will receive the message'''
+    def sendMessage(self, to_address, to_channel, payload):
+        ''' Send the payload to ebyte E32 LoRa modules in transparent or fixed mode. The payload is a data dictionary to
+            accomodate key value pairs commonly used to store sensor data and is converted to a JSON string before sending.
+            - transparent mode : all modules with the same address and channel of the transmitter will receive the payload
+            - fixed mode : only the module with this address and channel will receive the payload;
+                           if the address is 0xFFFF all modules with the same channel will receive the payload'''
         try:
             # type of transmission
             if (to_address == self.config['address']) and (to_channel == self.config['channel']):
                 # transparent transmission mode
-                # all modules with the same address and channel will receive the message
+                # all modules with the same address and channel will receive the payload
                 self.setTransmissionMode(0)
             else:
                 # fixed transmission mode
-                # only the module with the target address and channel will receive the message
+                # only the module with the target address and channel will receive the payload
                 self.setTransmissionMode(1)
             # put into wakeup mode (includes preamble signals to wake up device in powersave or sleep mode)
             self.setOperationMode('wakeup')
+            # check payload
+            if type(payload) != dict:
+                print('payload is not a dictionary')
+                return 'NOK'
             # encode message
             msg = []
             if self.config['transmode'] == 1:     # only for fixed transmission mode
                 msg.append(to_address//256)          # high address byte
                 msg.append(to_address%256)           # low address byte
                 msg.append(to_channel)               # channel
-            for i in range(len(message)):         # message
-                msg.append(ord(message[i]))       # ascii code of character
+            js_payload = ujson.dumps(payload)     # convert payload to JSON string 
+            for i in range(len(js_payload)):      # message
+                msg.append(ord(js_payload[i]))    # ascii code of character
             # debug
             if self.debug:
                 print(msg)
@@ -224,10 +230,11 @@ class ebyteE32:
         
         
     def recvMessage(self, from_address, from_channel):
-        ''' Receive messages from ebyte E32 LoRa modules in transparent or fixed mode.
-            - transparent mode : message will be received if the module has the same address and channel of the transmitter
-            - fixed mode : only messages from transmitters with this address and channel will be received;
-                           if the message address is 0xFFFF, messages from all transmitters with this channel will be received'''
+        ''' Receive payload messages from ebyte E32 LoRa modules in transparent or fixed mode. The payload is a JSON string
+            of a data dictionary to accomodate key value pairs commonly used to store sensor data.
+            - transparent mode : payload will be received if the module has the same address and channel of the transmitter
+            - fixed mode : only payloads from transmitters with this address and channel will be received;
+                           if the address is 0xFFFF, payloads from all transmitters with this channel will be received'''
         try:
             # type of transmission
             if (from_address == self.config['address']) and (from_channel == self.config['channel']):
@@ -241,19 +248,21 @@ class ebyteE32:
             # put into normal mode
             self.setOperationMode('normal')
             # receive message
-            msg = self.serdev.read()
+            js_payload = self.serdev.read()
             # debug
             if self.debug:
-                print(msg)
+                print(js_payload)
             # did we receive anything ?
-            if msg == None:
+            if js_payload == None:
                 # nothing
-                return 'No message'
+                return { 'msg':None }
             else :
                 # decode message
-                message = ''
-                for i in range(len(msg)):
-                    message += chr(msg[i])
+                msg = ''
+                for i in range(len(js_payload)):
+                    msg += chr(js_payload[i])
+                # JSON to dictionary
+                message = ujson.loads(msg)
                 return message
         
         except Exception as E:
@@ -429,8 +438,8 @@ class ebyteE32:
         print('=================== CONFIG =====================')
         print('model       \tE32-%s'%(self.config['model']))
         print('frequency   \t%dMhz'%(self.config['frequency']))
-        print('address     \t%s'%(hex(self.config['address'])))
-        print('channel     \t%s'%(hex(self.config['channel'])))
+        print('address     \t0x%04x'%(self.config['address']))
+        print('channel     \t0x%02x'%(self.config['channel']))
         print('datarate    \t%sbps'%(self.config['datarate']))                
         print('port        \t%s'%(self.config['port']))
         print('baudrate    \t%dbps'%(self.config['baudrate']))
