@@ -179,15 +179,19 @@ def __init__(self, PinM0, PinM1, PinAUX, Model='868T20D', Port='U1', Baudrate=96
 def start(self):
     ''' Start the ebyte E32 LoRa module '''
 
-def sendMessage(self, to_address, to_channel, message):
-    ''' Send the message to ebyte E32 LoRa modules in transparent or fixed mode.
-        - transparent mode : all modules with the same address and channel of the transmitter will receive the message
-        - fixed mode : only the module with the address and channel of the message will receive; if the address is 0xFFFF all modules with the same channel will receive the message'''
+def sendMessage(self, to_address, to_channel, payload):
+    ''' Send the payload to ebyte E32 LoRa modules in transparent or fixed mode. The payload is a data dictionary to
+        accomodate key value pairs commonly used to store sensor data and is converted to a JSON string before sending.
+        - transparent mode : all modules with the same address and channel of the transmitter will receive the payload
+        - fixed mode : only the module with this address and channel will receive the payload;
+                        if the address is 0xFFFF all modules with the same channel will receive the payload'''
 
 def recvMessage(self, from_address, from_channel):
-    ''' Receive messages from ebyte E32 LoRa modules in transparent or fixed mode.
-    - transparent mode : message will be received if the module has the same address and channel of the transmitter
-    - fixed mode : only messages from transmitters with this address and channel will be received; if the address is 0xFFFF messages from all transmitters with this channel will be received'''
+    ''' Receive payload messages from ebyte E32 LoRa modules in transparent or fixed mode. The payload is a JSON string
+        of a data dictionary to accomodate key value pairs commonly used to store sensor data.
+        - transparent mode : payload will be received if the module has the same address and channel of the transmitter
+        - fixed mode : only payloads from transmitters with this address and channel will be received;
+                        if the address is 0xFFFF, payloads from all transmitters with this channel will be received'''
 
 def reset(self):
     ''' Reset the ebyte E32 Lora module '''
