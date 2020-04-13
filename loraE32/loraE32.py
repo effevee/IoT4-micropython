@@ -173,8 +173,6 @@ class ebyteE32:
                 print(self.M0, self.M1, self.AUX)
             # set config to the ebyte E32 LoRa module
             self.setConfig('setConfigPwrDwnSave')
-            # save config to json file
-            self.saveConfigToJson()
             return "OK"
         
         except Exception as E:
@@ -552,4 +550,7 @@ class ebyteE32:
         # set operation mode
         self.M0.value(int(bits[0]))
         self.M1.value(int(bits[1]))
+        # wait a moment
+        utime.sleep_ms(50)
+        
     
