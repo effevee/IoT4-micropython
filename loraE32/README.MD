@@ -179,19 +179,25 @@ def __init__(self, PinM0, PinM1, PinAUX, Model='868T20D', Port='U1', Baudrate=96
 def start(self):
     ''' Start the ebyte E32 LoRa module '''
 
-def sendMessage(self, to_address, to_channel, payload):
+def sendMessage(self, to_address, to_channel, payload, useChecksum=False):
     ''' Send the payload to ebyte E32 LoRa modules in transparent or fixed mode. The payload is a data dictionary to
         accomodate key value pairs commonly used to store sensor data and is converted to a JSON string before sending.
+        The payload can be appended with a 2's complement checksum to validate correct transmission.
         - transparent mode : all modules with the same address and channel of the transmitter will receive the payload
         - fixed mode : only the module with this address and channel will receive the payload;
                         if the address is 0xFFFF all modules with the same channel will receive the payload'''
 
-def recvMessage(self, from_address, from_channel):
+def recvMessage(self, from_address, from_channel, useChecksum=False):
     ''' Receive payload messages from ebyte E32 LoRa modules in transparent or fixed mode. The payload is a JSON string
-        of a data dictionary to accomodate key value pairs commonly used to store sensor data.
+        of a data dictionary to accomodate key value pairs commonly used to store sensor data. If checksumming is used, the
+        checksum of the received payload including the checksum byte should result in 0 for a correct transmission.
         - transparent mode : payload will be received if the module has the same address and channel of the transmitter
         - fixed mode : only payloads from transmitters with this address and channel will be received;
-                        if the address is 0xFFFF, payloads from all transmitters with this channel will be received'''
+                           if the address is 0xFFFF, payloads from all transmitters with this channel will be received'''
+
+def calcChecksum(self, payload):
+    ''' Calculates checksum for sending/receiving payloads. Sums the ASCII character values mod256 and returns
+        the lower byte of the two's complement of that value in hex notation. '''
 
 def reset(self):
     ''' Reset the ebyte E32 Lora module '''
