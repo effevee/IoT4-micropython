@@ -22,9 +22,9 @@ to_channel = 0x02
 
 teller = 0
 while True:
-    message = 'HELLO WORLD %s'%str(teller)
+    message = { 'msg': 'HELLO WORLD %s'%str(teller) }
     print('Sending transparent : address %s - channel %d - message %s'%(to_address, to_channel, message))
-    e32.sendMessage(to_address, to_channel, { 'msg':message })
+    e32.sendMessage(to_address, to_channel, message, useChecksum=True)
     teller += 1
     utime.sleep_ms(2000)
 

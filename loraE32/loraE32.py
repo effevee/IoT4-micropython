@@ -183,9 +183,10 @@ class ebyteE32:
             return "NOK"
         
   
-    def sendMessage(self, to_address, to_channel, payload):
+    def sendMessage(self, to_address, to_channel, payload, useChecksum=False):
         ''' Send the payload to ebyte E32 LoRa modules in transparent or fixed mode. The payload is a data dictionary to
             accomodate key value pairs commonly used to store sensor data and is converted to a JSON string before sending.
+            The payload can be appended with a 2's complement checksum to validate correct transmission.
             - transparent mode : all modules with the same address and channel of the transmitter will receive the payload
             - fixed mode : only the module with this address and channel will receive the payload;
                            if the address is 0xFFFF all modules with the same channel will receive the payload'''
@@ -214,6 +215,8 @@ class ebyteE32:
             js_payload = ujson.dumps(payload)     # convert payload to JSON string 
             for i in range(len(js_payload)):      # message
                 msg.append(ord(js_payload[i]))    # ascii code of character
+            if useChecksum:                       # attach 2's complement checksum
+                msg.append(int(self.calcChecksum(js_payload), 16))
             # debug
             if self.debug:
                 print(msg)
@@ -229,9 +232,10 @@ class ebyteE32:
             return "NOK"
         
         
-    def recvMessage(self, from_address, from_channel):
+    def recvMessage(self, from_address, from_channel, useChecksum=False):
         ''' Receive payload messages from ebyte E32 LoRa modules in transparent or fixed mode. The payload is a JSON string
-            of a data dictionary to accomodate key value pairs commonly used to store sensor data.
+            of a data dictionary to accomodate key value pairs commonly used to store sensor data. If checksumming is used, the
+            checksum of the received payload including the checksum byte should result in 0 for a correct transmission.
             - transparent mode : payload will be received if the module has the same address and channel of the transmitter
             - fixed mode : only payloads from transmitters with this address and channel will be received;
                            if the address is 0xFFFF, payloads from all transmitters with this channel will be received'''
@@ -261,6 +265,15 @@ class ebyteE32:
                 msg = ''
                 for i in range(len(js_payload)):
                     msg += chr(js_payload[i])
+                # checksum check
+                if useChecksum:
+                    cs = int(self.calcChecksum(msg),16)
+                    if cs != 0:
+                        # corrupt
+                        return { 'msg':'corrupt message, checksum ' + str(cs) }
+                    else:
+                        # message ok, remove checksum
+                        msg = msg[:-1]
                 # JSON to dictionary
                 message = ujson.loads(msg)
                 return message
@@ -271,6 +284,12 @@ class ebyteE32:
             return "NOK"
 
     
+    def calcChecksum(self, payload):
+        ''' Calculates checksum for sending/receiving payloads. Sums the ASCII character values mod256 and returns
+            the lower byte of the two's complement of that value in hex notation. '''
+        return '%2X' % (-(sum(ord(c) for c in payload) % 256) & 0xFF)
+
+
     def reset(self):
         ''' Reset the ebyte E32 Lora module '''
         try:
@@ -533,6 +552,4 @@ class ebyteE32:
         # set operation mode
         self.M0.value(int(bits[0]))
         self.M1.value(int(bits[1]))
-    
-
     

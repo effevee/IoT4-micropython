@@ -22,7 +22,7 @@ from_channel = 0x02
 
 while True:
     print('Receiving transparent : address %d - channel %d'%(from_address, from_channel), end='')
-    message = e32.recvMessage(from_address, from_channel)
+    message = e32.recvMessage(from_address, from_channel, useChecksum=True)
     print(' - message %s'%(message))
     utime.sleep_ms(2000)
 

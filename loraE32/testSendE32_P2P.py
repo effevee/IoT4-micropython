@@ -23,9 +23,9 @@ message = "HELLO WORLD "
 
 teller = 0
 while True:
-    message = 'HELLO WORLD %s'%str(teller)
+    message = { 'msg': 'HELLO WORLD %s'%str(teller) }
     print('Sending fixed P2P: address %d - channel %d - message %s'%(to_address, to_channel, message))
-    e32.sendMessage(to_address, to_channel, { 'msg':message })
+    e32.sendMessage(to_address, to_channel, message, useChecksum=True)
     teller += 1
     utime.sleep_ms(2000)
 
