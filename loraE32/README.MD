@@ -255,3 +255,56 @@ transparent|[code](testSendE32_Transparent.py)|[code](testRecvE32_Transparent.py
 |fixed broadcast|[code](testSendE32_Broadcast.py)|[code](testRecvE32_Broadcast.py)
 |fixed monitor|[code](testSendE32_Monitor.py)|[code](testRecvE32_Monitor.py)
 
+## Proof of Concept
+
+To validate the proper working of the ebyteE32 micropython class this simple sensor measuring scenario has been implemented :
+1. __Sensor node(s)__ ([code](SensorNodeE32_01.py))\
+
+    - each sensor node contains an ESP32 microcontroller, an Ebyte E32 LoRa module, a sensor and a 3.3V power supply with integrated 18650 Li-ion battery.
+    - the node wakes up every 5 minutes, takes a sensor reading and transmits it with the E32 LoRa module. Then it goes to deepsleep to extend the battery life.
+    - all sensor nodes transmit on the same LoRa channel, but can have different addresses.
+    - sensor node 01 has a DHT11 temperature and humidity sensor.\
+    ![E32-868T20D](images/E32_sensor_node_01.jpg)
+
+1. __Monitor node__ ([code](MonitorNodeE32.py))\
+
+    - this node contains an ESP32 microcontroller and an Ebyte E32 LoRa module. It is powered 24/7 with a 5V USB supply.
+    - the E32 LoRa module is configured as a fixed monitor device (address 0xFFFF) and receives all transmissions from sensor node(s) with the same channel.
+    - the incoming sensor data is stored in a Influxdb database table. The sensor data from each sensor node is stored in it's own database table.
+    - the Influxdb database runs on a PC on the local network; the monitor node updates the database via a WiFi connection to the same local network.\
+    ![E32-868T20D](images/E32_monitor_node.jpg)
+
+1. __Influxdb server__\
+
+    - the Influxdb database server runs on a Linux Mint 19 PC
+    - __dbhost__ : IP address of Linux PC 
+    - __database__ : serre_frank
+    - __table__ : node_01 (each sensor node has it's own table)
+    - __fields__ : time - field - value\
+    ```
+        > select * from node_01
+        name: node_01
+        time		    field	value
+        ----		    -----	-----
+        1586888687213847522	    hum	        27
+        1586888687213847522	    temp	12
+        1586889000758763606	    hum	        27
+        1586889000758763606	    temp	11
+        ...
+        1586951625631028963	    hum	        12
+        1586951625631028963	    temp	41
+        1586951939053618579	    hum	        12
+        1586951939053618579	    temp	41
+    ```
+    - the sensor data from the Influxdb table(s) is visualised on a Grafana dashboard. The Grafana server is running on the same PC in the local network.\
+    
+1. __Grafana server__\
+
+    - the Grafana server runs on a Linux Mint 19 PC
+    - __dashboard__ : Serre Frank\
+    ![E32-868T20D](images/Grafana_dashboard.jpg)
+    - __graph 1__ : Temperature\
+    ![E32-868T20D](images/Grafana_graph1.jpg)
+    - __graph 2__ : Humidity\
+    ![E32-868T20D](images/Grafana_graph2.jpg)
+
