@@ -273,7 +273,7 @@ To validate the proper working of the ebyteE32 micropython class this simple sen
     ![E32-868T20D](images/E32_monitor_node.jpg)
 
 1. __Influxdb server__
-    - the Influxdb database server runs on a Linux Mint 19 PC
+    - the Influxdb database server runs on a Linux Mint 19 PC on the local network.
     - __dbhost__ : IP address of Linux PC 
     - __database__ : serre_frank
     - __table__ : node_01 (each sensor node has it's own table)
@@ -293,14 +293,13 @@ To validate the proper working of the ebyteE32 micropython class this simple sen
         1586951939053618579	    hum	        12
         1586951939053618579	    temp	41
     ```
-    - the sensor data from the Influxdb table(s) is visualised on a Grafana dashboard. The Grafana server is running on the same PC in the local network.
-    
+
 1. __Grafana server__
-    - the Grafana server runs on a Linux Mint 19 PC
+    - the sensor data from the Influxdb table(s) is visualised on a Grafana dashboard. The Grafana server is running on the same Linux Mint 19 PC on the local network.
     - __dashboard__ : Serre Frank
     ![E32-868T20D](images/Grafana_dashboard.jpg)
-    - __graph 1__ : Temperature\
+    - __panel 1__ : Temperature\
     ![E32-868T20D](images/Grafana_graph1.jpg)
-    - __graph 2__ : Humidity\
+    - __panel 2__ : Humidity\
     ![E32-868T20D](images/Grafana_graph2.jpg)
 
